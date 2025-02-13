@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Service Summary</h2>
+    
+    {% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">Total Requests</div>
+                <div class="card-body">
+                    <h3>{{ total_requests or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">Closed Requests</div>
+                <div class="card-body">
+                    <h3>{{ closed_requests or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">Pending Requests</div>
+                <div class="card-body">
+                    <h3>{{ pending_requests or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">Assigned Requests</div>
+                <div class="card-body">
+                    <h3>{{ assigned_requests or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if pie_chart %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Service Request Statuses</div>
+                <div class="card-body">
+                    <img src="data:image/png;base64,{{ pie_chart }}" class="img-fluid" alt="Pie Chart">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Monthly Service Requests</div>
+                <div class="card-body">
+                    <img src="data:image/png;base64,{{ bar_chart }}" class="img-fluid" alt="Bar Chart">
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

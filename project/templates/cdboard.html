@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Request a Service</h1>
+
+    <!-- Types of Services -->
+    <div class="row mt-4">
+        <div class="col-md-6 offset-md-3">
+            <h3 class="text-center">Types of Service</h3>
+            <ul class="list-group">
+                <!-- Loop through different service types -->
+                {% for service in services %}
+                <li class="list-group-item">
+                    <strong>{{ service.name }}</strong> 
+                    <a href="{{ url_for('service_details', service_id=service.id) }}" class="btn btn-primary float-right">View Packages</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

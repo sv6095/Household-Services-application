@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Professional Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn {
+            background-color: #e2b334;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class='alert alert-warning'>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+
+    <div class="container">
+        <h3>Professional Information</h3>
+
+        <form action="/profreg" method="post" enctype="multipart/form-data">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="re-password">Re-enter Password:</label>
+            <input type="password" id="re-password" name="re-password" required>
+
+            <!-- Dropdown for selecting service -->
+            <label for="service">Service:</label>
+            <select id="service" name="service" required>
+                <option value="AC Service">AC Service</option>
+                <option value="Fridge Service ">Fridge Repair</option>
+                <option value="Cleaning Service">Cleaning Service</option>
+                <option value="Washing Machine Service">Washing Machine Repair</option>
+                <option value="TV Service">TV Repair</option>
+                <option value="Plumbing Service">Plumbing Service</option>
+                <option value="Electrical Service">Electrical Service</option>
+                <option value="Pest Control">Pest Control</option>
+                <option value="Carpentry">Carpentry</option>
+                <option value="Painting Service">Painting Service</option>
+            </select>
+
+            <label for="work_experience">Work Experience:</label>
+            <input type="text" id="work_experience" name="work_experience" required>
+
+            <label for="id_proof">Upload Government ID Proof in pdf (less than 5 MB):</label>
+            <input type="file" id="id_proof" name="id_proof" accept=".pdf" required>
+
+            <!-- Register button -->
+            <button type="submit" class="btn">Register</button>
+        </form>
+    </div>
+
+</body>
+</html>

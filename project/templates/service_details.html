@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Service Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">{{ service.name }} - Packages & Pricing</h1>
+
+    <!-- Packages with Prices -->
+    <div class="row mt-4">
+        <div class="col-md-8 offset-md-2">
+            <ul class="list-group">
+                <!-- Loop through service packages -->
+                {% for package in packages %}
+                <li class="list-group-item">
+                    <strong>{{ package.name }}</strong> - ₹{{ package.price }}
+                    <p>{{ package.description }}</p>
+
+                    <!-- Form for booking the package -->
+                    <form method="POST" action="{{ url_for('service_details', service_id=service.id) }}">
+                        <input type="hidden" name="service_id" value="{{ service.id }}">
+                        <input type="hidden" name="package_name" value="{{ package.name }}">
+                        <input type="hidden" name="package_price" value="{{ package.price }}">
+                        <input type="hidden" name="description" value="{{ package.description }}">
+                        <button type="submit" class="btn btn-success">Book Now</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Admin Dashboard</h1>
+
+    <!-- Professionals Table -->
+    <h3 class="text-center mt-4">Professionals</h3>
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Work Experience</th>
+                <th>Service</th>
+                <th>Status</th>
+                <th>ID Proof</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for professional in professionals %}
+            <tr>
+                <td>{{ professional.name }}</td>
+                <td>{{ professional.email }}</td>
+                <td>{{ professional.work_experience }} years</td>
+                <td>{{ professional.service }}</td>
+                <td>{{ 'Approved' if professional.is_approved else 'Pending' }}</td>
+                <td>
+                    {% if professional.id_proof %}
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#proofModal{{ professional.id }}">
+                        View Proof
+                    </button>
+                    {% else %}
+                    <span>No proof uploaded</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not professional.is_approved %}
+                    <form action="{{ url_for('manage_professional', professional_id=professional.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" name="action" value="approve" class="btn btn-success">Approve</button>
+                        <button type="submit" name="action" value="reject" class="btn btn-danger">Reject</button>
+                    </form>
+                    {% else %}
+                    <span>Approved</span>
+                    {% endif %}
+                </td>
+            </tr>
+            
+            <!-- Modal for ID Proof -->
+            <div class="modal fade" id="proofModal{{ professional.id }}" tabindex="-1" aria-labelledby="proofModalLabel{{ professional.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="proofModalLabel{{ professional.id }}">ID Proof of {{ professional.name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <img src="{{ url_for('static', filename='uploads/' + professional.id_proof) }}" class="img-fluid" alt="ID Proof">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No professionals available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Display Existing Service Requests -->
+    <h3 class="text-center mt-5">Existing Service Requests</h3>
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>Service Type</th>
+                <th>Description</th>
+                <th>Customer</th>
+                <th>Professional</th>
+                <th>Request Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in service_requests %}
+            <tr>
+                <td>{{ request.service_type }}</td>
+                <td>{{ request.description }}</td>
+                <td>{{ request.customer.name }}</td>
+                <td>{{ request.professional.name if request.professional else 'Unassigned' }}</td>
+                <td>{{ request.request_date.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">No service requests available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Manage Service Packages Section -->
+    <h3 class="text-center mt-5">Manage Service Packages</h3>
+    <form action="{{ url_for('manage_service_packages') }}" method="POST" class="mt-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="service_id">Service</label>
+                <select id="service_id" name="service_id" class="form-control">
+                    {% for service in services %}
+                    <option value="{{ service.id }}">{{ service.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="package_name">Package Name</label>
+                <input type="text" id="package_name" name="package_name" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label for="package_price">Price</label>
+                <input type="number" id="package_price" name="price" class="form-control" required>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">Add/Modify Package</button>
+        </div>
+    </form>
+
+    <!-- Existing Service Packages Table -->
+    <h3 class="text-center mt-5">Existing Service Packages</h3>
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>Service</th>
+                <th>Package Name</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service_id, package_list in packages.items() %}
+            {% for package in package_list %}
+            <tr>
+                <td>{{ services[service_id-1].name }}</td>
+                <td>{{ package.name }}</td>
+                <td>{{ package.price }}</td>
+                <td>
+                    <form action="{{ url_for('update_package_price') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="service_id" value="{{ service_id }}">
+                        <input type="hidden" name="package_name" value="{{ package.name }}">
+                        <input type="number" name="new_price" value="{{ package.price }}" required>
+                        <button type="submit" class="btn btn-warning">Update Price</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}

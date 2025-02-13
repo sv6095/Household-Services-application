@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Home Services{% endblock %}
+
+{% block content %}
+<div class="main-content text-center bg-light p-4 rounded shadow-sm">
+    {% if not username %}
+        <h2 class="fw-bold">Welcome to 24/7 Home Services</h2>
+        <p class="fs-5 text-muted">We provide a variety of reliable home services to meet your needs.</p>
+        <a class="btn btn-primary mt-3" href="{{ url_for('login_page') }}">Get Started</a>
+    {% else %}
+        {% if 'admin' in roles %}
+            <script>window.location.href = "{{ url_for('admin_dashboard') }}";</script>
+        {% elif 'customer' in roles %}
+            <script>window.location.href = "{{ url_for('customer_dashboard') }}";</script>
+        {% elif 'professional' in roles %}
+            <script>window.location.href = "{{ url_for('professional_dashboard') }}";</script>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
