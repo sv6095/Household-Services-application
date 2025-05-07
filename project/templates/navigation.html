@@ -6,8 +6,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                {% if not username %}
-                    <!-- Home Link (only visible for non-logged-in users) -->
+                {% if session.get('user_id') is none %}
                     <li class="nav-item">
                         <a class="nav-link" href="/">Home</a>
                     </li>
@@ -18,32 +17,26 @@
                         <a class="nav-link" href="{{ url_for('register_page') }}">Register</a>
                     </li>
                 {% else %}
-                    <!-- Links visible for logged-in users -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('search') }}">Search</a>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('summary') }}">Summary</a>
                     </li>
                     
-                    <!-- Role-based Dashboard Links -->
-                    {% if 'admin' in roles %}
+                    {% if session.get('role') == 'admin' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
                         </li>
-                    {% elif 'customer' in roles %}
+                    {% elif session.get('role') == 'customer' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('customer_dashboard') }}">Customer Dashboard</a>
                         </li>
-                    {% elif 'professional' in roles %}
+                    {% elif session.get('role') == 'professional' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('professional_dashboard') }}">Professional Dashboard</a>
                         </li>
                     {% endif %}
 
-                    <!-- Logout Link -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout ({{ session.get('username', '') }})</a>
                     </li>
                 {% endif %}
             </ul>

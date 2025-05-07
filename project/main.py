@@ -1,15 +1,16 @@
 from datetime import datetime
 from importlib.resources import Package
 import os
-from flask import Flask, flash, render_template, session, request, redirect, url_for
+from flask import Flask, flash, render_template, session, request, redirect, url_for, send_file
 import matplotlib.pyplot as plt
 import io
 import base64
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from datetime import datetime
 from applications.database import db
 from applications.config import Config
 from applications.model import *  
+from sqlalchemy import Column, Integer, String, Float, DateTime
 
 def create_app():
     app = Flask(__name__, template_folder='templates')  
@@ -128,6 +129,7 @@ def login_page():
             session['username'] = user.username
 
             roles = [role.name.lower() for role in user.roles]
+            session['roles'] = roles  
 
             if 'admin' in roles:
                 return redirect(url_for('admin_dashboard'))
@@ -245,7 +247,9 @@ def profreg():
         file = request.files['id_proof']
         
         if file and file.filename.endswith('.pdf'):
-            upload_folder = 'C:\\ibw\\project\\uploads'  # Update this path
+            upload_folder = r"C:\Users\shant\Downloads\ibw\ibw\project\uploads" # Update this path
+            # Ensure the upload folder exists
+            os.makedirs(upload_folder, exist_ok=True)
             file_path = os.path.join(upload_folder, file.filename)
 
             file.save(file_path)
@@ -298,12 +302,11 @@ def profreg():
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
-    professionals = Professional.query.all()  # Fetch professionals from the database
-    assigned_requests = []  # Fetch assigned service requests from the database
-
-    # Fetch username and roles from the session
+    professionals = Professional.query.all()
+    assigned_requests = []
     username = session.get('username')
     roles = session.get('roles', [])
+
 
     return render_template(
         'adboard.html', 
@@ -311,9 +314,29 @@ def admin_dashboard():
         assigned_requests=assigned_requests, 
         services=services, 
         packages=packages,
-        username=username,  # Add username to the template
-        roles=roles         # Add roles to the template
+        username=username,
+        roles=roles
     )
+
+@app.route('/admin/view_id_proof/<int:professional_id>')
+def view_id_proof(professional_id):
+    # Check if user is admin
+    roles = session.get('roles', [])
+    if 'admin' not in roles:
+        flash('Unauthorized access', 'danger')
+        return redirect(url_for('home'))
+
+    professional = Professional.query.get_or_404(professional_id)
+    if professional.id_proof and os.path.exists(professional.id_proof):
+        return send_file(
+            professional.id_proof,
+            mimetype='application/pdf',
+            as_attachment=False,  # Show in browser instead of download
+            download_name=f'id_proof_{professional.username}.pdf'
+        )
+    else:
+        flash('ID proof not found', 'error')
+        return redirect(url_for('admin_dashboard'))
 
 
 # Manage Professional Route
@@ -432,7 +455,7 @@ def service_details(service_id):
 
         # Capture the form data
         package_name = request.form.get('package_name')
-        package_price = request.form.get('package_price')
+        package_price = float(request.form.get('package_price'))  # Ensure price is captured
         description = request.form.get('description')
 
         # Find available and approved professionals for this service
@@ -451,7 +474,8 @@ def service_details(service_id):
                     description=description,
                     status='Pending',
                     request_date=datetime.utcnow(),
-                    customer_id=customer_id
+                    customer_id=customer_id,
+                    price=package_price  # Set the price
                 )
                 db.session.add(new_service_request)
                 db.session.flush()  # This gets us the ID without committing
@@ -501,13 +525,31 @@ def professional_dashboard():
         return redirect(url_for('login_page'))
 
     # Fetch assigned service requests with 'Pending' status, for the same service type
-    assigned_requests = (
+    assigned_rows = (
         ServiceRequest.query
         .filter(ServiceRequest.professional_id.is_(None), ServiceRequest.status == 'Pending')
         .filter(ServiceRequest.service_type == professional.service)  
         .join(Customer)
-        .all()
+        .add_columns(
+            ServiceRequest.id.label('request_id'),
+            ServiceRequest.request_date,
+            ServiceRequest.price,
+            ServiceRequest.description,
+            Customer.name.label('customer_name')
+        ).all()
     )
+
+    # Convert query results to list of dicts
+    assigned_requests = []
+    for row in assigned_rows:
+        # Access values using getattr to handle both Row and NamedTuple results
+        assigned_requests.append({
+            'id': getattr(row, 'request_id'),
+            'request_date': getattr(row, 'request_date'),
+            'price': getattr(row, 'price'),
+            'description': getattr(row, 'description'),
+            'customer_name': getattr(row, 'customer_name')
+        })
 
     # Fetch service history (accepted, rejected, completed)
     service_history = ServiceRequest.query.filter(ServiceRequest.professional_id == professional.id).filter(ServiceRequest.status != 'Pending').all()
@@ -517,7 +559,8 @@ def professional_dashboard():
                            assigned_requests=assigned_requests, 
                            service_history=service_history,
                            services=services, 
-                           packages=packages)
+                           packages=packages
+                           )  # Pass price to the template
 
 
 @app.route('/accept_or_reject_request/<int:request_id>', methods=['POST'])

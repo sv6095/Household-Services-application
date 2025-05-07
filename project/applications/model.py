@@ -78,6 +78,7 @@ class ServiceRequest(db.Model):
     # Foreign key linking to the Customer who made the request
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))
     professional = db.relationship('Professional', backref='service_requests')
+    price = db.Column(db.Float, nullable=False)  # Price of the service
 
 # Assignment Model 
 class Assignment(db.Model):
@@ -87,5 +88,5 @@ class Assignment(db.Model):
     service_request_id = db.Column(db.Integer, db.ForeignKey('service_requests.id'))
     assignment_date = db.Column(db.DateTime, nullable=False)
     completion_status = db.Column(db.String(50), default='Not Assigned')
-    feedback = db.Column(db.String(500), nullable=True) 
+    feedback = db.Column(db.String(500), nullable=True)
 
