@@ -32,11 +32,9 @@
                             <td>{{ 'Approved' if professional.is_approved else 'Pending' }}</td>
                             <td>
                                 {% if professional.id_proof %}
-                                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#proofModal{{ professional.id }}">
-                                    View Proof
-                                </button>
+                                <a href="{{ url_for('view_id_proof', professional_id=professional.id) }}" target="_blank">View ID Proof</a>
                                 {% else %}
-                                <span>No proof uploaded</span>
+                                Not Uploaded
                                 {% endif %}
                             </td>
                             <td>
@@ -50,21 +48,6 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        
-                        <!-- Modal for ID Proof -->
-                        <div class="modal fade" id="proofModal{{ professional.id }}" tabindex="-1" aria-labelledby="proofModalLabel{{ professional.id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="proofModalLabel{{ professional.id }}">ID Proof of {{ professional.name }}</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <img src="{{ url_for('static', filename='uploads/' + professional.id_proof) }}" class="img-fluid" alt="ID Proof">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         {% else %}
                         <tr>
                             <td colspan="7" class="text-center">No professionals available.</td>

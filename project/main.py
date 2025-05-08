@@ -247,7 +247,7 @@ def profreg():
         file = request.files['id_proof']
         
         if file and file.filename.endswith('.pdf'):
-            upload_folder = r"C:\Users\shant\Downloads\ibw\ibw\project\uploads" # Update this path
+            upload_folder = os.path.join(app.root_path, 'uploads')
             # Ensure the upload folder exists
             os.makedirs(upload_folder, exist_ok=True)
             file_path = os.path.join(upload_folder, file.filename)
@@ -307,7 +307,7 @@ def admin_dashboard():
     username = session.get('username')
     roles = session.get('roles', [])
 
-
+    # Include id_proof in the professionals data
     return render_template(
         'adboard.html', 
         professionals=professionals, 
